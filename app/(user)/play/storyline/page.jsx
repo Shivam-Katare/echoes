@@ -60,6 +60,11 @@ function Storyline() {
     const maxChunks = storylineData.stories[0]?.story_chunks?.length || 0;
     if (nextChunkIndex < maxChunks) {
       setCurrentChunkIndex(nextChunkIndex);
+
+      updateCheckpoint(session, user_id, {
+        chapter_id: storylineData.currentChapter,
+        last_chunk_id: nextChunkIndex,
+      });
     } else {
       handleNextChapter();
     }
@@ -126,8 +131,8 @@ function Storyline() {
 
   if (!storylineData.stories.length) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center">
-        To be continued...
+      <div className="absolute inset-0 flex items-center justify-center text-white">
+        To be continued... SOON!
       </div>
     );
   }
