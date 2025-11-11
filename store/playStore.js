@@ -1,5 +1,5 @@
-import { createClerkSupabaseClient } from '@/lib/supabaseClient';
-import { create } from 'zustand';
+import { createClerkSupabaseClient } from "@/lib/supabaseClient";
+import { create } from "zustand";
 
 const usePlayStore = create((set) => ({
   words: [],
@@ -19,10 +19,10 @@ const usePlayStore = create((set) => ({
 
     try {
       const { data, error } = await supabase
-        .from('user_checkpoint')
-        .select('*')
-        .eq('user_id', userId)
-        .order('chapter_id', { ascending: true });
+        .from("user_checkpoint")
+        .select("*")
+        .eq("user_id", userId)
+        .order("chapter_id", { ascending: true });
 
       if (error) {
         set({
@@ -42,17 +42,18 @@ const usePlayStore = create((set) => ({
 
       // Set default if data is empty or null
       set({
-        checkpoint: data && data.length > 0
-          ? data
-          : [
-            {
-              id: 0, // Default ID
-              created_at: new Date().toISOString(), // Default timestamp
-              chapter_id: 1,
-              last_chunk_id: 0,
-              user_id: userId || "", // Use provided userId or empty string
-            },
-          ],
+        checkpoint:
+          data && data.length > 0
+            ? data
+            : [
+                {
+                  id: 0, // Default ID
+                  created_at: new Date().toISOString(), // Default timestamp
+                  chapter_id: 1,
+                  last_chunk_id: 0,
+                  user_id: userId || "", // Use provided userId or empty string
+                },
+              ],
         isLoading: false,
       });
     } catch (error) {
@@ -75,41 +76,41 @@ const usePlayStore = create((set) => ({
     if (!session) {
       return;
     }
-  
+
     const supabase = createClerkSupabaseClient(session);
     set({ isLoading: true });
-  
+
     try {
       const { data, error } = await supabase
-        .from('user_checkpoint')
-        .select('*')
-        .eq('user_id', userId);
-  
+        .from("user_checkpoint")
+        .select("*")
+        .eq("user_id", userId);
+
       if (error) {
         set({ isLoading: false });
         return;
       }
-  
+
       if (data && data.length > 0) {
         // Update existing checkpoint
         const { error: updateError } = await supabase
-          .from('user_checkpoint')
+          .from("user_checkpoint")
           .update(checkpointData)
-          .eq('user_id', userId);
-  
+          .eq("user_id", userId);
+
         if (updateError) {
         }
       } else {
         // Insert new checkpoint
         const { error: insertError } = await supabase
-          .from('user_checkpoint')
+          .from("user_checkpoint")
           .insert({
             ...checkpointData,
             user_id: userId,
           });
-  
+
         if (insertError) {
-          console.error('Error inserting checkpoint:', insertError);
+          console.error("Error inserting checkpoint:", insertError);
         }
       }
     } catch (error) {
@@ -119,77 +120,63 @@ const usePlayStore = create((set) => ({
     }
   },
 
-  fetchWords: async (difficulty) => {
-    const endpoint = "https://echoes-shivam.hypermode.app/graphql";
-    const key = process.env.NEXT_PUBLIC_MODUS_ENV; 
+  fetchWords: async (session, difficulty) => {
+    if (!session) {
+      set({ words: [], isLoading: false });
+      return;
+    }
 
-    const query = `
-      query Words($difficulty: String!) {
-        words(difficulty: $difficulty) {
-          id
-          word
-          difficulty
-          created_at
-        }
-      }
-    `;
+    const supabase = createClerkSupabaseClient(session);
     set({ isLoading: true });
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`,
-        },
-        body: JSON.stringify({
-          query,
-          variables: { difficulty },
-        }),
-      });
 
-      const data = await response.json();
-      const words = data?.data?.words || [];
-      set({ words });
+    try {
+      const { data, error } = await supabase
+        .from("words")
+        .select("*")
+        .eq("difficulty", difficulty)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching words:", error);
+        set({ words: [], isLoading: false });
+        return;
+      }
+
+      set({ words: data || [], isLoading: false });
     } catch (error) {
+      console.error("Error in fetchWords:", error);
       set({ words: [], isLoading: false });
     }
   },
 
-  fetchParas: async () => {
-    const endpoint = "https://echoes-shivam.hypermode.app/graphql";
-    const key = process.env.NEXT_PUBLIC_MODUS_ENV;
+  fetchParas: async (session) => {
+    if (!session) {
+      set({ paras: [], isLoading: false });
+      return;
+    }
 
-    const query = `
-      query Words() {
-        paras {
-         id
-         created_at
-         para
-       }
-      }
-    `;
+    const supabase = createClerkSupabaseClient(session);
     set({ isLoading: true });
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`,
-        },
-        body: JSON.stringify({
-          query
-        }),
-      });
 
-      const data = await response.json();
-      const paras = data?.data?.paras || [];
-      set({ paras });
+    try {
+      const { data, error } = await supabase
+        .from("paragraphs")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching paras:", error);
+        set({ paras: [], isLoading: false });
+        return;
+      }
+
+      set({ paras: data, isLoading: false });
     } catch (error) {
+      console.error("Error in fetchParas:", error);
       set({ paras: [], isLoading: false });
     }
   },
 
-  // story mode
   fetchStory: async (session) => {
     if (!session) {
       return;
@@ -200,16 +187,15 @@ const usePlayStore = create((set) => ({
 
     try {
       const { data, error } = await supabase
-        .from('stories')
-        .select('*')
-        .order('created_at', { ascending: true })
+        .from("stories")
+        .select("*")
+        .order("created_at", { ascending: true });
 
       if (error) {
         return;
       }
       set({ gameData: data, isLoading: false });
     } catch (error) {
-
       set({ gameData: [], isLoading: false });
     }
   },
@@ -227,10 +213,10 @@ const usePlayStore = create((set) => ({
     try {
       // First, fetch user's checkpoint data
       const { data: checkpointData, error: checkpointError } = await supabase
-        .from('user_checkpoint')
-        .select('*')
-        .eq('user_id', userId)
-        .order('chapter_id', { ascending: true });
+        .from("user_checkpoint")
+        .select("*")
+        .eq("user_id", userId)
+        .order("chapter_id", { ascending: true });
 
       if (checkpointError) {
         set({ galleryImages: [], isLoading: false });
@@ -248,24 +234,38 @@ const usePlayStore = create((set) => ({
         return;
       }
 
+      // If no checkpoint data, show no images
+      if (!checkpointData || checkpointData.length === 0) {
+        set({ galleryImages: [], isLoading: false });
+        return;
+      }
+
+      // Get the user's current progress
+      const currentCheckpoint = checkpointData[checkpointData.length - 1];
+      const currentChapterId = currentCheckpoint.chapter_id;
+      const currentChunkId = currentCheckpoint.last_chunk_id;
+
       // Filter images based on checkpoint progress
-      const filteredImages = allImages.filter(image => {
-        // Find the corresponding checkpoint for this image's chapter
-        const checkpoint = checkpointData.find(cp => cp.chapter_id === image.chapter_id);
-        
-        if (checkpoint) {
-          // Include the image if its unlock_chunk_id is less than or equal to the user's progress
-          return image.unlock_chunk_id <= checkpoint.last_chunk_id;
+      const filteredImages = allImages.filter((image) => {
+        // Show all images from chapters before the current chapter
+        if (image.chapter_id < currentChapterId) {
+          return true;
         }
-        return false; // Exclude images from chapters the user hasn't reached
+
+        // For the current chapter, show images up to current chunk
+        if (image.chapter_id === currentChapterId) {
+          return image.unlock_chunk_id <= currentChunkId;
+        }
+
+        // Don't show images from future chapters
+        return false;
       });
 
       set({ galleryImages: filteredImages, isLoading: false });
     } catch (error) {
       set({ galleryImages: [], isLoading: false });
     }
-  }
-
+  },
 }));
 
 export default usePlayStore;

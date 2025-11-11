@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import usePlayStore from "@/store/playStore";
 import TimesUpDialog from "@/components/dialogs/timesup-dialog";
-import { List, Music, Volume2, VolumeOff } from "lucide-react";
+import { List, Volume2, VolumeOff } from "lucide-react";
 import useLeaderboardStore from "@/store/leaderboardStore";
 import { useSession } from "@clerk/nextjs";
 import { useUser } from '@clerk/nextjs';
@@ -130,9 +130,9 @@ function Story() {
     setText('');
     setCurrentText('');
     if (challangeType === 'paragraphs') {
-        fetchParas();
+        fetchParas(session);
     } else {
-        fetchWords(difficulty);
+        fetchWords(session, difficulty);
     }
     // initializeGame();
   };
@@ -198,48 +198,6 @@ function Story() {
     }
 };
 
-
-//   const handleSentenceInput = (e) => {
-//     const value = e.target.value;
-
-//     // Only allow typing up to the first incorrect character
-//     let newValue = '';
-//     let i = 0;
-
-//     // Check each character until we find a mismatch or reach the end
-//     while (i < value.length && i < text.length) {
-//       if (value[i] === text[i]) {
-//          correctSound.play();
-//         newValue += value[i];
-//         i++;
-//       } else {
-//         // If character is incorrect, only keep up to this point
-//         // and increment incorrect count
-//         incorrectSound.play();
-//         setIncorrectCount(prev => prev + 1);
-//         break;
-//       }
-//     }
-
-//     setCurrentText(newValue);
-//     setCorrectCount(newValue.length); // Correct count is the length of matching characters
-
-//     // Check if the sentence is completed correctly
-//     if (newValue === text) {
-//         // Generate new sentence
-//         let newText;
-//         do {
-//           newText = paras[Math.floor(Math.random() * paras.length)].para;
-//         } while (newText === text);
-
-//         // Set the new sentence and reset the states
-//         setText(newText);
-//         setCurrentText('');
-//         setCorrectCount(0);
-//         setIncorrectCount(0);
-//     }
-// };
-
 const handleSentenceInput = (e) => {
   const value = e.target.value;
   let newValue = value;
@@ -297,32 +255,17 @@ const handleSentenceInput = (e) => {
     }
   };
 
-  // const initializeGame = useCallback(() => {
-  //   if (paras && paras.length > 0) {
-  //     const para = paras[0].para;
-  //     // Take first 150 characters to show a manageable portion
-  //     const shortenedPara = para.substring(0, 150) + '...';
-  //     setText(shortenedPara);
-  //     setCurrentPara(shortenedPara);
-  //     setCurrentText('');
-  //     setCorrectCount(0);
-  //     setIncorrectCount(0);
-  //     setIsGameActive(false);
-  //   }
-  // }, [paras, setText, setCurrentText, setCorrectCount, setIncorrectCount, setIsGameActive]);
-
   useEffect(() => {
     if (!session) return;
     fetchGlobalLeaderboard(session);
-    // fetchLeaderboard(session);
   }, [session, fetchLeaderboard]);
 
   useEffect(() => {
     if (challangeType === 'words') {
-      fetchWords(difficulty);
+      fetchWords(session, difficulty);
     } 
     if (challangeType === 'paragraphs') {
-      fetchParas();
+      fetchParas(session);
     }
   }, [difficulty, fetchWords, fetchParas, challangeType]);
 
@@ -379,7 +322,6 @@ const handleSentenceInput = (e) => {
   useEffect(() => {
     if (showCountdown && paras && paras.length > 0) {
       const para = paras[0].para;
-      // const shortenedPara = para.substring(0, 150) + '...';
       setText(para);
 
       const countdownInterval = setInterval(() => {
@@ -402,7 +344,6 @@ const handleSentenceInput = (e) => {
     <main className={`min-h-screen pb-8 ${animationClass} gradient-hero-4`}
 
       style={{
-        // background: bgGradient,
         transition: 'opacity 0.5s ease-in-out',
       }}
 

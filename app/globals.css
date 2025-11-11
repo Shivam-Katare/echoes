@@ -130,7 +130,7 @@ body {
 
 @keyframes scroll {
   0% {
-    transform: translateY(100%);
+    transform: translateY(50%);
   }
   100% {
     transform: translateY(-100%);
@@ -138,7 +138,7 @@ body {
 }
 
 .animate-scroll {
-  animation: scroll 50s linear infinite;
+  animation: scroll 30s linear infinite;
 }
 
 @keyframes float {
