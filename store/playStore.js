@@ -234,18 +234,31 @@ const usePlayStore = create((set) => ({
         return;
       }
 
+      // If no checkpoint data, show no images
+      if (!checkpointData || checkpointData.length === 0) {
+        set({ galleryImages: [], isLoading: false });
+        return;
+      }
+
+      // Get the user's current progress
+      const currentCheckpoint = checkpointData[checkpointData.length - 1];
+      const currentChapterId = currentCheckpoint.chapter_id;
+      const currentChunkId = currentCheckpoint.last_chunk_id;
+
       // Filter images based on checkpoint progress
       const filteredImages = allImages.filter((image) => {
-        // Find the corresponding checkpoint for this image's chapter
-        const checkpoint = checkpointData.find(
-          (cp) => cp.chapter_id === image.chapter_id
-        );
-
-        if (checkpoint) {
-          // Include the image if its unlock_chunk_id is less than or equal to the user's progress
-          return image.unlock_chunk_id <= checkpoint.last_chunk_id;
+        // Show all images from chapters before the current chapter
+        if (image.chapter_id < currentChapterId) {
+          return true;
         }
-        return false; // Exclude images from chapters the user hasn't reached
+
+        // For the current chapter, show images up to current chunk
+        if (image.chapter_id === currentChapterId) {
+          return image.unlock_chunk_id <= currentChunkId;
+        }
+
+        // Don't show images from future chapters
+        return false;
       });
 
       set({ galleryImages: filteredImages, isLoading: false });
