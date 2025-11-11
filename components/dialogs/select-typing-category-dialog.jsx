@@ -14,60 +14,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-const categories = [
-  {
-    id: 1,
-    name: 'words',
-    emoji: '🎬',
-  },
-  {
-    id: 2,
-    name: 'Music',
-    emoji: '🎵',
-  },
-  {
-    id: 3,
-    name: 'Book',
-    emoji: '📚',
-  },
-  {
-    id: 4,
-    name: 'Game',
-    emoji: '🎮',
-  },
-  {
-    id: 5,
-    name: 'Food',
-    emoji: '🍔',
-  },
-  {
-    id: 6,
-    name: 'Animal',
-    emoji: '🐶',
-  },
-  {
-    id: 7,
-    name: 'Place',
-    emoji: '🏞️',
-  },
-  {
-    id: 8,
-    name: 'Sport',
-    emoji: '⚽',
-  },
-  {
-    id: 9,
-    name: 'Cartoon',
-    emoji: '🦸',
-  },
-  // More users...
-];
-
-const difficulties = [
-  { id: 'easy', name: 'Easy', color: 'bg-green-500 text-black' },
-  { id: 'medium', name: 'Medium', color: 'bg-yellow-500 text-black' },
-  { id: 'hard', name: 'Hard', color: 'bg-red-500 text-white' },
-];
 
 const wordsTimes = [
   { id: 'easy', name: 'Easy', time: '45 seconds' },
@@ -82,7 +28,7 @@ const paragraphsTimes = [
 ];
 
 const SelectTypingCategoryDialog = ({ isOpen, onConfirm, isLoading, changeColor }) => {
-  const { setCategory, setDifficulty, category, difficulty, time, setTime, challangeType, setChallangeType } = useGameSettingsStore();
+  const { setDifficulty, time, setTime, challangeType, setChallangeType } = useGameSettingsStore();
 
   const canSave = challangeType && time;
 
